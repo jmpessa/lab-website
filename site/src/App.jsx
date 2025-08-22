@@ -22,6 +22,12 @@ function App() {
       const height = document.documentElement.scrollHeight - window.innerHeight;
       const pct = height > 0 ? (scrolled / height) * 100 : 0;
       setScrollPct(pct);
+      // lightweight parallax on elements with data-parallax
+      document.querySelectorAll('[data-parallax]')?.forEach((el) => {
+        const speed = parseFloat(el.getAttribute('data-parallax')) || 0.2;
+        const y = scrolled * speed;
+        el.style.transform = `translate3d(0, ${y}px, 0)`;
+      });
     };
     onScroll();
     window.addEventListener("scroll", onScroll);
@@ -78,6 +84,7 @@ function App() {
         <nav style={styles.nav}>
           <a href="#about">About</a>
           <a href="#research">Research</a>
+          <a href="#gallery">Gallery</a>
           <a href="#team">Team</a>
           <a href="#publications">Publications</a>
           <a href="#contact">Contact</a>
@@ -116,8 +123,8 @@ function App() {
             </a>
           </div>
         </div>
-        <div style={styles.blobOne} />
-        <div style={styles.blobTwo} />
+        <div style={styles.blobOne} data-parallax="0.05" />
+        <div style={styles.blobTwo} data-parallax="0.03" />
         <div className="marquee" style={styles.marquee}>
           <div className="marquee__track" style={styles.marqueeTrack}>
             {["synapses", "organoids", "circuit plasticity", "optogenetics", "human iPSC", "connectivity"].map((w, i) => (
@@ -172,6 +179,41 @@ function App() {
         </div>
       </section>
 
+      {/* Gallery — responsive media grid with Ken Burns + parallax */}
+      <section id="gallery" style={styles.section}>
+        <h2 style={styles.h2}>Gallery</h2>
+        <p style={{opacity:.9, marginTop:4}}>Drop your lab photos into <code>site/public/media/</code> and update the URLs below.</p>
+        <div style={styles.mediaGrid}>
+          {[ 
+            {src: "/media/organoid.jpg", alt: "Human cortical organoid", cap: "Human cortical organoid (DAPI/Map2)", kb: true, depth: 0.08},
+            {src: "/media/rig.jpg", alt: "Electrophysiology rig", cap: "Multi-electrode recording rig", kb: false, depth: 0.12},
+            {src: "/media/team.jpg", alt: "Lab team", cap: "Team retreat in Serra da Lousã", kb: true, depth: 0.06},
+            {src: "/media/microscope.jpg", alt: "Two-photon microscope", cap: "Two‑photon imaging", kb: false, depth: 0.1},
+          ].map((m, i) => (
+            <figure key={i} style={styles.mediaTile} data-parallax={m.depth}>
+              <div
+                style={{
+                  ...styles.mediaImg,
+                  ...(m.kb ? styles.kenBurns : {}),
+                  backgroundImage: `url(${m.src})`
+                }}
+                role="img"
+                aria-label={m.alt}
+              />
+              <figcaption style={styles.mediaCaption}>{m.cap}</figcaption>
+            </figure>
+          ))}
+        </div>
+        {/* Animated Lab Accent (SVG stroke-dashoffset reveal) */}
+        <div style={{marginTop: "1.2rem"}}>
+          <svg viewBox="0 0 600 80" width="100%" height="80" style={{maxWidth: 800}} aria-hidden="true">
+            <path d="M5 60 Q 120 10, 240 60 T 475 60 T 595 60" fill="none" stroke="var(--accent)" strokeWidth="3" strokeLinecap="round">
+              <animate attributeName="stroke-dasharray" from="0,700" to="700,0" dur="2s" fill="freeze"/>
+            </path>
+          </svg>
+        </div>
+      </section>
+
       {/* Team — minimalist placeholder */}
       <section id="team" style={styles.section}>
         <h2 style={styles.h2}>Meet the Team</h2>
@@ -221,6 +263,41 @@ function App() {
 
 // --- styles ---
 const styles = {
+  mediaGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+    gap: "1rem",
+    marginTop: "0.75rem",
+  },
+  mediaTile: {
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: 16,
+    border: "1px solid var(--hairline)",
+    background: "var(--bg-elev)",
+  },
+  mediaImg: {
+    width: "100%",
+    aspectRatio: "4 / 3",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    transform: "translate3d(0,0,0)",
+    transition: "transform 800ms cubic-bezier(.2,.6,0,1)",
+  },
+  kenBurns: {
+    animation: "kenburns 14s ease-in-out infinite alternate",
+  },
+  mediaCaption: {
+    position: "absolute",
+    left: 10,
+    bottom: 10,
+    padding: "0.3rem 0.55rem",
+    borderRadius: 12,
+    fontSize: 13,
+    background: "color-mix(in oklab, var(--bg) 70%, transparent)",
+    border: "1px solid var(--hairline)",
+    backdropFilter: "blur(4px)",
+  },
   page: {
     fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial",
     margin: 0,
@@ -482,6 +559,19 @@ function globalCss(seedHue) {
 
   /* Marquee */
   @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* Ken Burns subtle zoom-pan */
+  @keyframes kenburns {
+    0% { transform: scale(1.02) translate3d(0,0,0); }
+    100% { transform: scale(1.08) translate3d(0,-8px,0); }
+  }
+
+  /* Motion safety */
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: 0ms !important; }
+  }
+
+  figure:hover > div { transform: scale(1.06); }
   `;
 }
 
