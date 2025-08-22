@@ -73,8 +73,22 @@ function App() {
     return () => window.removeEventListener("mousemove", onMove);
   }, []);
 
+  // Reveal on scroll via IntersectionObserver (mount-time)
+  useEffect(() => {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) e.target.classList.add("appear");
+      });
+    }, { threshold: 0.08 });
+    document.querySelectorAll("section").forEach((s) => io.observe(s));
+    return () => io.disconnect();
+  }, []);
+
   return (
     <div style={styles.page}>
+      <div style={{position:"fixed",top:0,left:0,right:0,zIndex:2000,fontSize:12,padding:"4px 8px",background:"#ffd",color:"#000",borderBottom:"1px solid #e6dca8"}}>
+        Debug: React mounted — if you can read this, rendering works.
+      </div>
       {/* Global styles + keyframes */}
       <style>{globalCss(gradientSeed)}</style>
 
@@ -306,8 +320,8 @@ const styles = {
     fontFamily: "ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial",
     margin: 0,
     padding: 0,
-    color: "var(--fg)",
-    background: "linear-gradient(180deg, var(--bg) 0%, var(--bg-soft) 100%)",
+    color: "var(--fg, #111)",
+    background: "linear-gradient(180deg, var(--bg, #ffffff) 0%, var(--bg-soft, #f7f7f7) 100%)",
   },
   progress: {
     position: "fixed",
@@ -579,19 +593,6 @@ function globalCss(seedHue) {
   `;
 }
 
-// Reveal on scroll via IntersectionObserver
-(function initObservers() {
-  if (typeof window === "undefined") return;
-  const on = () => {
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) e.target.classList.add("appear");
-      });
-    }, { threshold: 0.08 });
-    document.querySelectorAll("section").forEach((s) => io.observe(s));
-  };
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", on);
-  else on();
-})();
+
 
 export default App;
