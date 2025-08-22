@@ -86,9 +86,6 @@ function App() {
 
   return (
     <div style={styles.page}>
-      <div style={{position:"fixed",top:0,left:0,right:0,zIndex:2000,fontSize:12,padding:"4px 8px",background:"#ffd",color:"#000",borderBottom:"1px solid #e6dca8"}}>
-        Debug: React mounted — if you can read this, rendering works.
-      </div>
       {/* Global styles + keyframes */}
       <style>{globalCss(gradientSeed)}</style>
 
