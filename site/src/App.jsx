@@ -12,6 +12,9 @@ function App() {
   const [scrollPct, setScrollPct] = useState(0);
 
   useEffect(() => {
+    document.documentElement.classList.add("js");
+  }, []);
+  useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
@@ -279,6 +282,7 @@ const styles = {
   mediaImg: {
     width: "100%",
     aspectRatio: "4 / 3",
+    minHeight: 220,
     backgroundSize: "cover",
     backgroundPosition: "center",
     transform: "translate3d(0,0,0)",
@@ -553,9 +557,9 @@ function globalCss(seedHue) {
   .tilt:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.2); }
   .tilt:hover .cardShine { opacity: 1; }
 
-  /* Auto-reveal sections */
-  section { opacity: 0; translate: 0 12px; transition: opacity .5s ease, translate .5s ease; }
-  section.appear { opacity: 1; translate: 0 0; }
+  /* Auto-reveal sections (only when JS is enabled) */
+  html.js section { opacity: 0; translate: 0 12px; transition: opacity .5s ease, translate .5s ease; }
+  html.js section.appear { opacity: 1; translate: 0 0; }
 
   /* Marquee */
   @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
